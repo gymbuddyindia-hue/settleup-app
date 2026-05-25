@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#116b5f">
+    <meta name="description" content="Offline-first personal lend and borrow tracker with copyable payment numbers.">
+    <title>SettleUp (Sanin's)</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/snf-wallet-logo.png" type="image/png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="stylesheet" href="styles.css?v=21">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Private offline ledger</p>
+          <h1>SettleUp (Sanin's)</h1>
+        </div>
+        <button class="icon-button" id="installButton" type="button" aria-label="Install app" title="Install app">
+          <span aria-hidden="true">⬇</span>
+        </button>
+      </header>
+
+      <main>
+        <section class="summary-band" aria-labelledby="summaryTitle">
+          <div>
+            <p class="eyebrow">Net position</p>
+            <h2 id="summaryTitle">₹0</h2>
+            <p id="summaryCopy">Nobody owes anything right now.</p>
+          </div>
+          <div class="summary-grid" aria-label="Balance summary">
+            <div>
+              <span>You are owed</span>
+              <strong id="owedTotal">₹0</strong>
+            </div>
+            <div>
+              <span>You owe</span>
+              <strong id="youOweTotal">₹0</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="my-number-card" aria-label="My payment number">
+          <div>
+            <span>My payment number</span>
+            <strong id="myPaymentNumber">95920309</strong>
+          </div>
+          <button class="secondary-action compact-action" id="copyMyNumber" type="button">Copy</button>
+        </section>
+
+        <nav class="tabs" aria-label="Views">
+          <button class="tab active" type="button" data-view="peopleView">People</button>
+          <button class="tab" type="button" data-view="logView">Log</button>
+          <button class="tab" type="button" data-view="splitsView">Splits</button>
+          <button class="tab" type="button" data-view="digestView">Digest</button>
+        </nav>
+
+        <section class="view active" id="peopleView" aria-labelledby="peopleTitle">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Balances</p>
+              <h2 id="peopleTitle">People</h2>
+            </div>
+            <button class="primary-action" id="quickAddPerson" type="button">Add person</button>
+          </div>
+          <label class="search-field" aria-label="Search people">
+            <span>Search people</span>
+            <input id="peopleSearch" type="search" autocomplete="off" placeholder="Type a name or number...">
+          </label>
+          <div id="peopleList" class="people-list"></div>
+        </section>
+
+        <section class="view" id="logView" aria-labelledby="logTitle">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Money movement</p>
+              <h2 id="logTitle">Ledger</h2>
+            </div>
+          </div>
+          <div id="ledgerList" class="ledger-list"></div>
+        </section>
+
+        <section class="view" id="splitsView" aria-labelledby="splitsTitle">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Group math</p>
+              <h2 id="splitsTitle">Splits</h2>
+            </div>
+            <button class="primary-action" id="quickAddSplit" type="button">New split</button>
+          </div>
+          <div id="splitLogList" class="split-log-list"></div>
+        </section>
+
+        <section class="view" id="digestView" aria-labelledby="digestTitle">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Weekly check-in</p>
+              <h2 id="digestTitle">Outstanding Digest</h2>
+            </div>
+            <div class="button-row utility-actions">
+              <button class="secondary-action" id="backupData" type="button">Backup</button>
+              <button class="secondary-action" id="restoreData" type="button">Restore</button>
+              <button class="secondary-action" id="copyDigest" type="button">Copy</button>
+            </div>
+          </div>
+          <div class="digest-panel">
+            <pre id="digestText"></pre>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <aside class="action-rail" aria-label="Quick actions">
+      <button class="rail-button primary" id="openLent" type="button">
+        <span aria-hidden="true">+</span>
+        <span>Owes me</span>
+      </button>
+      <button class="rail-button" id="openBorrowed" type="button">
+        <span aria-hidden="true">−</span>
+        <span>I Owe</span>
+      </button>
+      <button class="rail-button" id="openSplit" type="button">
+        <span aria-hidden="true">÷</span>
+        <span>Split</span>
+      </button>
+    </aside>
+
+    <dialog id="personDialog">
+      <form method="dialog" class="modal-card" id="personForm">
+        <div class="modal-head">
+          <h2>Add Person</h2>
+          <button class="icon-button ghost" data-close-dialog type="button" aria-label="Close">×</button>
+        </div>
+        <label>
+          Name
+          <input id="personName" name="personName" autocomplete="name" required placeholder="Ravi">
+        </label>
+        <label>
+          Phone Number for Payment <span class="optional-text">Optional</span>
+          <input id="personPhone" name="personPhone" inputmode="tel" autocomplete="tel" placeholder="+919876543210">
+        </label>
+        <button class="primary-action full" type="submit">Save person</button>
+      </form>
+    </dialog>
+
+    <dialog id="entryDialog">
+      <form method="dialog" class="modal-card" id="entryForm">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow" id="entryModeLabel">Entry</p>
+            <h2 id="entryTitle">Log Money</h2>
+          </div>
+          <button class="icon-button ghost" data-close-dialog type="button" aria-label="Close">×</button>
+        </div>
+        <input id="entryType" type="hidden" value="lent">
+        <label>
+          Person
+          <select id="entryPerson" required></select>
+        </label>
+        <label>
+          Amount
+          <input id="entryAmount" inputmode="decimal" min="0.001" step="0.001" type="number" placeholder="0.500" required>
+        </label>
+        <label>
+          Currency
+          <select id="entryCurrency" required>
+            <option value="INR">Indian Rupee (₹)</option>
+            <option value="OMR">Omani Rial (OMR)</option>
+          </select>
+        </label>
+        <label>
+          Reason
+          <input id="entryReason" placeholder="Dinner, cab, ticket..." maxlength="80" required>
+        </label>
+        <label>
+          Date
+          <input id="entryDate" type="date" required>
+        </label>
+        <button class="primary-action full" type="submit">Save entry</button>
+      </form>
+    </dialog>
+
+    <dialog id="settleDialog">
+      <form method="dialog" class="modal-card" id="settleForm">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">Settle balance</p>
+            <h2 id="settlePersonName">Settle</h2>
+          </div>
+          <button class="icon-button ghost" data-close-dialog type="button" aria-label="Close">×</button>
+        </div>
+        <input id="settlePersonId" type="hidden">
+        <p class="settle-copy" id="settleBalanceCopy"></p>
+        <label>
+          Amount settled
+          <input id="settleAmount" inputmode="decimal" min="0.001" step="0.001" type="number" required>
+        </label>
+        <label>
+          Currency
+          <select id="settleCurrency" required></select>
+        </label>
+        <div class="button-row">
+          <button class="secondary-action" id="settleFull" type="button">Full amount</button>
+          <button class="primary-action" type="submit">Save settlement</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="splitDialog">
+      <form method="dialog" class="modal-card" id="splitForm">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">Group split</p>
+            <h2>Split Bill</h2>
+          </div>
+          <button class="icon-button ghost" data-close-dialog type="button" aria-label="Close">×</button>
+        </div>
+        <label>
+          Currency
+          <select id="splitCurrency" required>
+            <option value="INR">Indian Rupee (₹)</option>
+            <option value="OMR">Omani Rial (OMR)</option>
+          </select>
+        </label>
+        <label>
+          Split name
+          <input id="splitReason" placeholder="Dinner, trip, groceries..." maxlength="80" required>
+        </label>
+        <label>
+          Date
+          <input id="splitDate" type="date" required>
+        </label>
+        <div>
+          <p class="form-label">People involved</p>
+          <p class="helper-copy">Sanin is included automatically.</p>
+          <div class="check-list" id="splitPeople"></div>
+        </div>
+        <div>
+          <div class="form-label-row">
+            <p class="form-label">Expenses paid</p>
+            <button class="secondary-action compact-action" id="addSplitExpense" type="button">Add item</button>
+          </div>
+          <div class="split-expense-list" id="splitExpenseList"></div>
+        </div>
+        <p class="settle-copy" id="splitPreview"></p>
+        <button class="primary-action full" type="submit">Save smart split</button>
+      </form>
+    </dialog>
+
+    <dialog id="deletePersonDialog">
+      <form method="dialog" class="modal-card" id="deletePersonForm">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow warning">Permanent delete</p>
+            <h2>Delete Person?</h2>
+          </div>
+          <button class="icon-button ghost" data-close-dialog type="button" aria-label="Close">×</button>
+        </div>
+        <input id="deletePersonId" type="hidden">
+        <p class="delete-copy" id="deletePersonCopy"></p>
+        <p class="delete-warning">This will delete the person and all their logs. Their balances and history will be removed permanently.</p>
+        <div class="button-row">
+          <button class="secondary-action" data-close-dialog type="button">Cancel</button>
+          <button class="danger-action" type="submit">Delete person</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="numberDialog">
+      <form method="dialog" class="modal-card" id="numberForm">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">Payment number</p>
+            <h2 id="numberPersonName">Add Number</h2>
+          </div>
+          <button class="icon-button ghost" data-close-dialog type="button" aria-label="Close">×</button>
+        </div>
+        <input id="numberPersonId" type="hidden">
+        <label>
+          Phone Number for Payment
+          <input id="numberPhone" inputmode="tel" autocomplete="tel" placeholder="+919876543210" required>
+        </label>
+        <button class="primary-action full" type="submit">Save number</button>
+      </form>
+    </dialog>
+
+    <dialog id="deleteDialog">
+      <form method="dialog" class="modal-card" id="deleteForm">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow warning">Permanent delete</p>
+            <h2>Delete Log?</h2>
+          </div>
+          <button class="icon-button ghost" data-close-dialog type="button" aria-label="Close">×</button>
+        </div>
+        <input id="deleteEntryId" type="hidden">
+        <p class="delete-copy" id="deleteCopy"></p>
+        <p class="delete-warning">This will remove the log and recalculate the person’s balance. This cannot be undone.</p>
+        <div class="button-row">
+          <button class="secondary-action" data-close-dialog type="button">Cancel</button>
+          <button class="danger-action" type="submit">Delete log</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="installHelpDialog">
+      <div class="modal-card">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">Install app</p>
+            <h2>Add to Home Screen</h2>
+          </div>
+          <button class="icon-button ghost" data-close-dialog type="button" aria-label="Close">×</button>
+        </div>
+        <div class="install-steps">
+          <p><strong>Chrome / Android:</strong> Open this app in Chrome, tap the ⋮ menu, then tap <strong>Add to Home screen</strong> or <strong>Install app</strong>.</p>
+          <p><strong>iPhone / Safari:</strong> Tap Share, then <strong>Add to Home Screen</strong>.</p>
+          <p class="settle-copy">If the install option does not appear, open the app from a secure HTTPS link or localhost. Browsers do not install PWAs from ordinary file links.</p>
+        </div>
+      </div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <input id="restoreFile" type="file" accept="application/json,.json" hidden>
+
+    <script>
+      function showInlineToast(message) {
+        const toast = document.querySelector("#toast");
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add("show");
+        window.setTimeout(() => toast.classList.remove("show"), 2200);
+      }
+
+      async function copyInlineText(text) {
+        if (navigator.clipboard?.writeText) {
+          try {
+            await navigator.clipboard.writeText(text);
+            return true;
+          } catch {
+          }
+        }
+
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        textarea.style.left = "-9999px";
+        document.body.append(textarea);
+        textarea.focus();
+        textarea.select();
+        textarea.setSelectionRange(0, textarea.value.length);
+        const copied = document.execCommand("copy");
+        textarea.remove();
+        return copied;
+      }
+
+      function getInlineSplitExpenseRows() {
+        return [...document.querySelectorAll(".split-expense-row")].map((row) => ({
+          payerId: row.querySelector("[data-split-payer]")?.value || "self",
+          excludedId: row.querySelector("[data-split-excluded]")?.value || "",
+          label: row.querySelector("[data-split-label]")?.value || "",
+          amount: row.querySelector("[data-split-amount]")?.value || "",
+        }));
+      }
+
+      function getInlineSplitParties() {
+        const selected = [...document.querySelectorAll("#splitPeople input[type='checkbox']:checked")]
+          .map((input) => ({ id: input.value, name: input.closest("label")?.innerText.trim() || "Person" }));
+        return [{ id: "self", name: "Sanin" }, ...selected];
+      }
+
+      function renderInlineSplitRows(rows) {
+        const list = document.querySelector("#splitExpenseList");
+        if (!list) return;
+        const safeRows = rows.length ? rows : [{ payerId: "self", excludedId: "", label: "", amount: "" }];
+        const parties = getInlineSplitParties();
+        const options = (selected) => parties
+          .map((party) => `<option value="${party.id}" ${party.id === selected ? "selected" : ""}>${party.name}</option>`)
+          .join("");
+        const excludeOptions = (selected) => [
+          `<option value="">No one</option>`,
+          ...parties.map((party) => `<option value="${party.id}" ${party.id === selected ? "selected" : ""}>${party.name}</option>`),
+        ].join("");
+
+        list.innerHTML = safeRows.map((row, index) => `
+          <div class="split-expense-row">
+            <select data-split-payer aria-label="Who paid">${options(row.payerId || "self")}</select>
+            <input data-split-label placeholder="Item" maxlength="40" value="${row.label || ""}">
+            <input data-split-amount inputmode="decimal" min="0.001" step="0.001" type="number" placeholder="0.000" value="${row.amount || ""}" aria-label="Amount">
+            <select data-split-excluded aria-label="Exclude from item">${excludeOptions(row.excludedId || "")}</select>
+            <button class="secondary-action compact-action" data-remove-expense="${index}" type="button" ${safeRows.length === 1 ? "disabled" : ""}>Remove</button>
+          </div>
+        `).join("");
+      }
+
+      document.addEventListener("click", (event) => {
+        const copyMyNumber = event.target.closest("#copyMyNumber");
+        if (copyMyNumber) {
+          event.preventDefault();
+          copyInlineText(document.querySelector("#myPaymentNumber")?.textContent || "95920309")
+            .then((copied) => showInlineToast(copied ? "Your payment number copied." : "Copy failed. Hold the number to copy."));
+          return;
+        }
+
+        const tab = event.target.closest(".tab[data-view]");
+        if (tab) {
+          event.preventDefault();
+          document.querySelectorAll(".tab").forEach((item) => item.classList.remove("active"));
+          document.querySelectorAll(".view").forEach((view) => view.classList.remove("active"));
+          tab.classList.add("active");
+          document.querySelector(`#${tab.dataset.view}`)?.classList.add("active");
+          return;
+        }
+
+        const addSplitExpense = event.target.closest("#addSplitExpense");
+        if (addSplitExpense && !window.settleUpReady) {
+          event.preventDefault();
+          renderInlineSplitRows([...getInlineSplitExpenseRows(), { payerId: "self", excludedId: "", label: "", amount: "" }]);
+          return;
+        }
+
+        const removeSplitExpense = event.target.closest("[data-remove-expense]");
+        if (removeSplitExpense && !window.settleUpReady) {
+          event.preventDefault();
+          const index = Number(removeSplitExpense.dataset.removeExpense);
+          renderInlineSplitRows(getInlineSplitExpenseRows().filter((_, rowIndex) => rowIndex !== index));
+          return;
+        }
+
+        const dialogMap = {
+          quickAddPerson: "personDialog",
+          openLent: "entryDialog",
+          openBorrowed: "entryDialog",
+          openSplit: "splitDialog",
+          quickAddSplit: "splitDialog",
+        };
+        const opener = event.target.closest("button[id]");
+        const dialogId = opener ? dialogMap[opener.id] : "";
+        const dialog = dialogId ? document.querySelector(`#${dialogId}`) : null;
+        if (dialog?.showModal && !dialog.open) {
+          if (window.settleUpReady) return;
+          event.preventDefault();
+          if (opener.id === "openSplit" || opener.id === "quickAddSplit") {
+            renderInlineSplitRows([{ payerId: "self", excludedId: "", label: "", amount: "" }]);
+          }
+          if (opener.id === "openLent" || opener.id === "openBorrowed") {
+            const entryType = document.querySelector("#entryType");
+            const entryModeLabel = document.querySelector("#entryModeLabel");
+            const entryTitle = document.querySelector("#entryTitle");
+            const type = opener.id === "openLent" ? "lent" : "borrowed";
+            if (entryType) entryType.value = type;
+            if (entryModeLabel) entryModeLabel.textContent = type === "lent" ? "Owes me" : "I owe";
+            if (entryTitle) entryTitle.textContent = type === "lent" ? "Owes Me" : "I Owe";
+          }
+          dialog.showModal();
+        }
+
+        const closeButton = event.target.closest("[data-close-dialog]");
+        if (closeButton) {
+          event.preventDefault();
+          closeButton.closest("dialog")?.close();
+        }
+      });
+    </script>
+    <script src="app.js?v=21" type="module"></script>
+  </body>
+</html>
