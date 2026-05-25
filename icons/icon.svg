@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="SNF wallet logo">
+  <defs>
+    <linearGradient id="appBg" x1="18" y1="8" x2="110" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#14947f"/>
+      <stop offset=".52" stop-color="#0b6458"/>
+      <stop offset="1" stop-color="#07352f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="34" cy="25" r="78" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f4e3a2" stop-opacity=".62"/>
+      <stop offset=".42" stop-color="#f4e3a2" stop-opacity=".08"/>
+      <stop offset="1" stop-color="#f4e3a2" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="walletBody" x1="23" y1="36" x2="104" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff8df"/>
+      <stop offset=".46" stop-color="#f2d680"/>
+      <stop offset="1" stop-color="#c99225"/>
+    </linearGradient>
+    <linearGradient id="walletFace" x1="29" y1="43" x2="100" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fffef8"/>
+      <stop offset=".4" stop-color="#eaf8f3"/>
+      <stop offset="1" stop-color="#b7ddd4"/>
+    </linearGradient>
+    <linearGradient id="strap" x1="75" y1="56" x2="111" y2="84" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#063f38"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+    <filter id="deepShadow" x="8" y="19" width="116" height="104" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#021f1c" flood-opacity=".45"/>
+    </filter>
+    <filter id="softInset" x="24" y="39" width="86" height="65" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#ffffff" flood-opacity=".8"/>
+    </filter>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="url(#appBg)"/>
+  <rect width="128" height="128" rx="30" fill="url(#glow)"/>
+  <path d="M101 20c7.5 5.8 11.6 13.4 12.4 22.9-9.5-.7-17.2-4.8-23-12.3 1.8-4.8 5.8-8.8 10.6-10.6z" fill="#f0c75e" opacity=".95"/>
+  <path d="M18 99c9.6 1 18.4 4.9 26.3 11.7-10.2 6.2-21 5.2-32.3-3.1 1.2-3.3 3.2-6.1 6-8.6z" fill="#d8f1eb" opacity=".18"/>
+  <g filter="url(#deepShadow)">
+    <path d="M20 46.2c0-7.8 6.3-14.2 14.2-14.2h57.1c7 0 12.7 5.7 12.7 12.7V53H39.7c-4.1 0-7.5 3.4-7.5 7.5V99H20V46.2z" fill="url(#walletBody)"/>
+    <path d="M26 54c0-8.3 6.7-15 15-15h57c6.6 0 12 5.4 12 12v40c0 8.3-6.7 15-15 15H41c-8.3 0-15-6.7-15-15V54z" fill="url(#walletFace)" filter="url(#softInset)"/>
+    <path d="M26 58h84v-7c0-6.6-5.4-12-12-12H41c-8.3 0-15 6.7-15 15v4z" fill="#ffffff" opacity=".72"/>
+    <path d="M79 59h31v30H79c-7.2 0-13-5.8-13-13v-4c0-7.2 5.8-13 13-13z" fill="url(#strap)"/>
+    <circle cx="82.5" cy="74" r="6.2" fill="#f0c75e"/>
+    <circle cx="82.5" cy="74" r="2.6" fill="#07352f" opacity=".28"/>
+    <path d="M42 54h34" stroke="#0a4f45" stroke-width="4" stroke-linecap="round" opacity=".3"/>
+    <path d="M44 70h8.8c6.3 0 9.8 2.6 9.8 7.2 0 4.8-3.7 7.5-10 7.5h-8.9M44 70v21M69 91V70l10.2 13.7L89.4 70v21" fill="none" stroke="#12312d" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M44 70h8.8c6.3 0 9.8 2.6 9.8 7.2 0 4.8-3.7 7.5-10 7.5h-8.9M44 70v21M69 91V70l10.2 13.7L89.4 70v21" fill="none" stroke="#ffffff" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" opacity=".46"/>
+  </g>
+</svg>
